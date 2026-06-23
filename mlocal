@@ -1,0 +1,33 @@
+folder=$(shell basename $(CURDIR))
+ENV_FILE=./secret/.env
+COMPOSE=docker compose -f docker-compose.yaml --env-file $(ENV_FILE)
+
+generate:
+	bun run:db generate
+
+db-reset:
+	bun run:db reset
+
+seed:
+	bun run:db seed
+
+studio:
+	@echo "Starting Prisma Studio in background and opening browser..."
+	nohup bun run:db studio >/dev/null 2>&1 & \
+	sleep 1; open http://localhost:5555
+
+dev:
+	bun dev
+
+up-db:
+	$(COMPOSE) up -d --wait db
+
+down:
+	$(COMPOSE) down
+
+bun-install:
+	bun install
+
+install: down up-db bun-install generate db-reset seed
+	bun run:db studio &
+	bun dev

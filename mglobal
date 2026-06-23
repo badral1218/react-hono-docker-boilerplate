@@ -1,0 +1,74 @@
+folder=$(shell basename $(CURDIR))
+
+ENV_FILE=./secret/.env
+
+COMPOSE=docker compose -f docker-compose.yaml --env-file $(ENV_FILE)
+
+.DEFAULT_GOAL := help
+.PHONY: help \
+	clear-deps clear-build clear-db clear \
+	bun-install up-db up-wait down up install \
+	generate migrate db-reset seed studio \
+	build docker-up docker-up-d down-docker logs bash-db psql \
+	typecheck
+
+help:
+	@echo "Usage: make [target]"
+	@grep -E '^[a-zA-Z_-]+:' $(MAKEFILE_LIST) | grep -v '=' | cut -d: -f1 | sort -u | sed 's/^/  /'
+
+# Cleanup
+clear-deps:
+	rm -rf node_modules apps/*/node_modules packages/*/node_modules
+
+clear-build:
+	rm -rf .turbo
+	rm -rf apps/*/dist
+	rm -rf apps/api/public
+	rm -rf packages/db/generated
+	rm -rf apps/*/*.tsbuildinfo packages/*/*.tsbuildinfo *.tsbuildinfo
+
+clear-db: down
+	docker volume rm -f $(folder)_db_data
+
+clear: clear-deps clear-build clear-db
+
+build:
+	$(COMPOSE) build
+
+up:
+	$(COMPOSE) up
+
+up-d:
+	$(COMPOSE) up -d
+
+down:
+	$(COMPOSE) down
+
+logs:
+	$(COMPOSE) logs -f
+
+bash-db:
+	$(COMPOSE) exec db bash
+
+psql:
+	$(COMPOSE) exec db bash -c 'psql -U $$POSTGRES_USER -d $$POSTGRES_DB'
+
+bash-app:
+	$(COMPOSE) exec app bash
+
+migrate:
+	$(COMPOSE) exec app bash -c 'cd packages/db && bun migrate'
+
+reset:
+	$(COMPOSE) exec app bash -c 'cd packages/db && bun reset'
+
+seed:
+	$(COMPOSE) exec app bash -c 'cd packages/db && bun seed'
+
+studio:
+	$(COMPOSE) exec app bash -c 'cd packages/db && bun studio'
+
+install: down clear build up-wait migrate seed
+
+up-wait:
+	$(COMPOSE) up -d --wait

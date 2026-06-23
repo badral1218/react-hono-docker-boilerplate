@@ -1,0 +1,32 @@
+{
+  "name": "@react-template/api",
+  "version": "1.0.0",
+  "exports": {
+    "./rpc": {
+      "import": {
+        "types": "./dist/lib/rpc.d.ts",
+        "default": "./dist/lib/rpc.js"
+      }
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=development bun --env-file=../../secret/.env --hot ./src/index.ts",
+    "dev:api": "NODE_ENV=development bun --env-file=../../secret/.env --hot ./src/index.ts",
+    "dev:rpc": "tsc -p tsconfig.rpc.json --watch --preserveWatchOutput true",
+    "dev:all": "bun ./src/scripts/dev.ts",
+    "build:rpc": "tsc -p tsconfig.rpc.json",
+    "prod": "NODE_ENV=production bun ./src/index.ts",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@react-template/constants": "workspace:*",
+    "@react-template/db": "workspace:*",
+    "@react-template/schemas": "workspace:*",
+    "@hono/swagger-ui": "^0.6.1",
+    "@hono/zod-openapi": "^1.4.0",
+    "@hono/zod-validator": "^0.8.0",
+    "hono": "^4.12.26",
+    "zod": "catalog:"
+  }
+}

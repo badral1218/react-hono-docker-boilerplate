@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Enable latest features
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+
+    // Bundler mode
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@api/*": ["./src/*"]
+    }
+  },
+  "include": ["./src"],
+  "references": [
+    { "path": "../../packages/db" },
+    { "path": "../../packages/constants" },
+    { "path": "../../packages/schemas" }
+  ]
+}

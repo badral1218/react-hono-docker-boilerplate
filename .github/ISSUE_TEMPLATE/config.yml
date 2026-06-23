@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💡 Ideas / Feature request
+    url: https://github.com/nashatech/whistler3/discussions/new?category=ideas-feature-requests
+    about: If you have an idea for automating your daily manual, redundant work on Whistler, please share it in the discussion.

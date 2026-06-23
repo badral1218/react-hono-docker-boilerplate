@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Enable latest features
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+
+    // Bundler mode
+    "composite": true,
+    "outDir": "./dist",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src", "generated", "prisma.config.ts", "prisma/seed.ts"]
+}

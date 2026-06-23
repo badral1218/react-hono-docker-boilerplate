@@ -1,0 +1,24 @@
+# Dependencies (reinstalled inside the image)
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+
+# Build outputs / caches
+.turbo
+apps/*/dist
+apps/api/public
+packages/db/generated
+**/*.tsbuildinfo
+
+# VCS & editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Local tooling / docs
+**/.DS_Store
+README.md
+
+# Secrets are provided at runtime via env_file / build args, not baked in
+secret
