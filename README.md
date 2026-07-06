@@ -200,3 +200,4 @@ make -f mglobal up      # start the database and application
 ```
 
 The application container runs the API in production mode and serves the pre-built web assets. The PostgreSQL service persists data in the `db_data` volume.
+# react-hono-docker-boilerplate
