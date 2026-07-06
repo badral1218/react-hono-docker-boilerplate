@@ -9,6 +9,7 @@
     "generate": "bun --bun run --env-file ../../secret/.env prisma generate",
     "migrate": "bun --bun run --env-file ../../secret/.env prisma migrate deploy",
     "reset": "bun --bun run --env-file ../../secret/.env prisma migrate reset -f",
+    "init": "bun --bun run --env-file ../../secret/.env prisma migrate dev --name init",
     "seed": "bun --bun run --env-file ../../secret/.env prisma db seed",
     "studio": "bun --bun run --env-file ../../secret/.env prisma studio",
     "typecheck": "tsc --noEmit",

@@ -4,4 +4,5 @@ export const USER_SESSION_EXPIRATION_MS = 1000 * USER_SESSION_EXPIRATION_S;
 export const OpenApiTags = {
   USER: "User",
   AUTH: "Auth",
+  EMPLOYEE: "Employee",
 } as const;

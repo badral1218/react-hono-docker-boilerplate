@@ -13,10 +13,10 @@ datasource db {
 }
 
 model User {
-  id           String @id @default(uuid())
-  email        String @unique
+  id           String  @id @default(uuid())
+  email        String  @unique
   passwordHash String
-  role         Role   @default(WORKER)
+  role         Role    @default(WORKER)
   name         String?
 
   session Session[]
@@ -40,4 +40,14 @@ model Session {
 enum Role {
   WORKER
   ADMIN
+}
+
+model Employee {
+  id Int @id @default(autoincrement())
+  email String @unique
+  firstName String
+  lastName String
+  age Int
+  birthday String
+  position String
 }
