@@ -1,0 +1,35 @@
+
+
+POST http://localhost:8000/api/employee/add HTTP/1.1
+content-type: application/json
+
+{
+    "firstName": "Badral",
+    "lastName":"Baigalmaa",
+    "age":20,
+    "birthday":"2005-12-18",
+    "position":"IE Engineer",
+    "email":"badralbaigalmaa7@gmail.com"
+}
+
+###
+
+DELETE  http://localhost:8000/api/employee/1 HTTP/1.1
+content-type: application/json
+
+{
+
+}
+
+###
+PUT http://localhost:8000/api/employee/2 HTTP/1.1
+content-type: application/json
+
+{
+    "firstName": "Badral1218",
+    "lastName":"Baigalmaa",
+    "age":20,
+    "birthday":"2005-12-18",
+    "position":"IE Engineer",
+    "email":"badralbaigalmaa7@gmail.com"
+}
