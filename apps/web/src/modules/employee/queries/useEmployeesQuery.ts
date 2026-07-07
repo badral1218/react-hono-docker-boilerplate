@@ -13,7 +13,7 @@ const getEmployees = async () => {
 
 export const useEmployeesQuery = () => {
   return useQuery({
-    queryKey: ["employees"],
+    queryKey: ["getEmployees"],
     queryFn: getEmployees,
   });
 };

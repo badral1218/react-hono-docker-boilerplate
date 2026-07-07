@@ -11,6 +11,7 @@ const bodySchema = z.object({
   position: z.string(),
   birthday: z.string(),
   email: z.string(),
+  order: z.number(),
 });
 
 const openAPIDefinition = createRouteWithDefaults({

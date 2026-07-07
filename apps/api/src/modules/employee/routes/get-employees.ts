@@ -18,6 +18,7 @@ const openAPIDefinition = createRouteWithDefaults({
                 firstName: z.string(),
                 lastName: z.string(),
                 age: z.number(),
+                order: z.number().nullable(),
                 birthday: z.string(),
                 position: z.string(),
               }),
@@ -32,7 +33,9 @@ const openAPIDefinition = createRouteWithDefaults({
 });
 
 const route = new OpenAPIHono().openapi(openAPIDefinition, async (c) => {
-  const employees = await prisma.employee.findMany();
+  const employees = await prisma.employee.findMany({
+    orderBy: { order: "asc" },
+  });
   return c.json({ employees }, 200);
 });
 
