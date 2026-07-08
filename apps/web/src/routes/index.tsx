@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, Check, Edit2, Save, X } from "lucide-react";
+import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { Check, Edit2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useUpdateEmployeeMutation } from "@/modules/employee/mutations/useEmployeeMutation";
+import {
+  useAddEmployeeMutation,
+  useUpdateEmployeeMutation,
+} from "@/modules/employee/mutations/useEmployeeMutation";
 import { useEmployeesQuery } from "@/modules/employee/queries/useEmployeesQuery";
 import type { Employee } from "@/types";
 import { createNewEmployeeData, employeeColumns } from "@/utils/employee-table-utils";
@@ -30,6 +33,7 @@ function App() {
 
   const [editingValue, setEditingValue] = useState<Employee | null>(null);
 
+  const addEmployee = useAddEmployeeMutation();
   const updateEmployee = useUpdateEmployeeMutation();
 
   const table = useReactTable({
@@ -45,44 +49,58 @@ function App() {
     },
   });
 
-  const handleSaveEditing = async () => {
-    if (editingValue) {
-      updateEmployee.mutate(editingValue);
-      setEditingRowId("");
-      setEditingValue(null);
+  const handleCancelEditing = () => {
+    if (editingValue?.id === -1) {
+      setTableData((old) => old.filter((row) => row.id !== -1));
     }
+
+    setEditingRowId("");
+    setEditingValue(null);
   };
 
-  const addRowAbove = (currentOrder: number | null) => {
-    const order = currentOrder ?? 1;
+  const handleSaveEditing = async () => {
+    if (!editingValue) {
+      return;
+    }
 
-    const abovePart = tableData.slice(0, order - 1);
+    if (editingValue.id === -1) {
+      const { id: _id, ...rest } = editingValue;
 
-    const newRow = createNewEmployeeData(order);
+      addEmployee.mutate(
+        {
+          ...rest,
+          order: rest.order ?? tableData.length,
+          age: Number(rest.age),
+        },
+        {
+          onSuccess: () => {
+            setEditingRowId("");
+            setEditingValue(null);
+          },
+        },
+      );
 
-    const lastPart = tableData.slice(order - 1).map((data) => {
-      data.order = data.order ? data.order + 1 : null;
+      return;
+    }
 
-      return data;
+    updateEmployee.mutate(editingValue, {
+      onSuccess: () => {
+        setEditingRowId("");
+        setEditingValue(null);
+      },
     });
-
-    const newData = [...abovePart, newRow, ...lastPart];
-
-    setTableData(newData);
   };
 
-  const addRowBelow = (currentOrder: number | null) => {
-    const order = currentOrder ?? 1;
+  const handleAddEmployee = () => {
+    if (editingRowId) {
+      return;
+    }
 
-    const firstPart = tableData.slice(0, order);
+    const newEmployee = createNewEmployeeData((data?.employees.length ?? 0) + 1);
 
-    const newRow = createNewEmployeeData(order + 1);
-
-    const lastPart = tableData.slice(order);
-
-    const newData = [...firstPart, newRow, ...lastPart];
-
-    setTableData(newData);
+    setTableData((old) => [newEmployee, ...old]);
+    setEditingRowId("0");
+    setEditingValue(newEmployee);
   };
 
   useEffect(() => {
@@ -110,20 +128,38 @@ function App() {
     );
   }
 
-  const editableCells = ["email", "firstName", "lastName", "birthday", "age", "position"];
+  const editableCells = [
+    "email",
+    "firstName",
+    "lastName",
+    "age",
+    "position",
+    "department",
+    "phoneNumber",
+  ];
 
   return (
     <main className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-white">
       <div className="mx-auto max-w-7xl px-8 py-12">
-        {/* Header */}
         <div className="mb-10">
           <h1 className="text-4xl font-bold tracking-tight">Employee Management</h1>
 
           <p className="mt-2 text-zinc-400">Manage your organization's employees from one place.</p>
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 shadow-2xl backdrop-blur overflow-hidden">
+          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+            <h2 className="text-lg font-semibold text-zinc-200">Employees</h2>
+            <Button
+              className="hover:cursor-pointer"
+              onClick={handleAddEmployee}
+              disabled={!!editingRowId}
+            >
+              <Plus size={16} />
+              Add Employee
+            </Button>
+          </div>
+
           <Table>
             <TableHeader className="sticky top-0 bg-zinc-900">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -136,10 +172,6 @@ function App() {
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
-
-                  <TableHead className="h-14 border-zinc-800 text-zinc-300 font-semibold">
-                    Action
-                  </TableHead>
                   <TableHead className="h-14 border-zinc-800 text-zinc-300 font-semibold pr-4">
                     Edit
                   </TableHead>
@@ -181,36 +213,19 @@ function App() {
                   ))}
 
                   <TableCell className="w-12 pr-4">
-                    <div className="flex gap-4">
-                      <ArrowUp
-                        onClick={() => addRowAbove(row.original.order)}
-                        className="hover:cursor-pointer"
-                        size={20}
-                      />
-                      <ArrowDown
-                        onClick={() => addRowBelow(row.original.order)}
-                        className="hover:cursor-pointer"
-                        size={20}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="w-12 pr-4">
                     {editingRowId === row.id ? (
                       <div className="flex gap-2 items-center">
                         <Button
                           variant={"secondary"}
                           className={"hover:cursor-pointer"}
-                          onClick={() => {
-                            setEditingRowId("");
-                            setEditingValue(null);
-                          }}
+                          onClick={handleCancelEditing}
                         >
                           <X size={16} />
                         </Button>
                         <Button
                           className={"hover:cursor-pointer bg-green-500 hover:bg-green-600"}
                           onClick={handleSaveEditing}
-                          disabled={updateEmployee.isPending}
+                          disabled={addEmployee.isPending || updateEmployee.isPending}
                         >
                           <Check size={16} />
                         </Button>
@@ -233,7 +248,7 @@ function App() {
             </TableBody>
           </Table>
         </div>
-        {/* Footer */}
+
         <div className="mt-5 flex items-center justify-between text-sm text-zinc-500">
           <span>
             Total Employees:{" "}

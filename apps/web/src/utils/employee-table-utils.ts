@@ -20,10 +20,6 @@ export const employeeColumns = [
     header: "Last name",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("birthday", {
-    header: "Birthday",
-    cell: (info) => info.getValue(),
-  }),
   columnHelper.accessor("age", {
     header: "Age",
     cell: (info) => info.getValue(),
@@ -32,18 +28,27 @@ export const employeeColumns = [
     header: "Position",
     cell: (info) => info.getValue(),
   }),
+  columnHelper.accessor("department", {
+    header: "Department",
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor("phoneNumber", {
+    header: "Phone Number",
+    cell: (info) => info.getValue(),
+  }),
 ];
 
 export const createNewEmployeeData = (order: number) => {
   return {
-    id: 0,
+    id: -1,
     firstName: "",
     lastName: "",
     age: 0,
-    birthday: "",
     email: "",
     order,
     position: "",
+    phoneNumber: "",
+    department: "",
   };
 };
 

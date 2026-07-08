@@ -4,6 +4,36 @@ import api from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import type { Employee } from "@/types";
 
+export type NewEmployee = Omit<Employee, "id"> & { order: number };
+
+export const useAddEmployeeMutation = () => {
+  return useMutation({
+    mutationKey: ["addEmployee"],
+
+    mutationFn: async (employee: NewEmployee) => {
+      const response = await api.employee.add.$post({
+        json: employee,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add employee");
+      }
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getEmployees"],
+      });
+
+      toast.success("Successfully added");
+    },
+
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+};
+
 export const useUpdateEmployeeMutation = () => {
   return useMutation({
     mutationKey: ["updateEmployeeById"],

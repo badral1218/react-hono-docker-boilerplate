@@ -48,7 +48,8 @@ model Employee {
   firstName String
   lastName  String
   age       Int
-  birthday  String
+  department String
+  phoneNumber String
   position  String
   order     Int?
 }
