@@ -25,6 +25,20 @@ const route = new OpenAPIHono().openapi(openAPIDefinition, async (c) => {
 
   await prisma.employee.delete({ where: { id: +id } });
 
+  const employees = await prisma.employee.findMany({
+    orderBy: { order: "asc" },
+  });
+
+  await Promise.all(
+    employees.map(
+      async (employee, index) =>
+        await prisma.employee.update({
+          where: { id: employee.id },
+          data: { order: index + 1 },
+        }),
+    ),
+  );
+
   return c.json({ success: true, message: "successfully deleted" });
 });
 
