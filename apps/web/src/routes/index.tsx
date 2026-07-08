@@ -108,9 +108,7 @@ function App() {
     }
   };
 
-  // Shifts every row from `fromOrder` onward down by one, then inserts a new
-  // row at that position. `fromOrder` is 1-indexed, matching `order` on Employee.
-  const insertRowAt = (fromOrder: number) => {
+  const insertRowAt = async (fromOrder: number) => {
     const shiftedRows = tableData.slice(fromOrder - 1);
     const reorderPayload = shiftedRows.map(({ id, order }) => ({
       id: String(id),
@@ -214,7 +212,7 @@ function App() {
                   key={row.id}
                   row={row}
                   index={index}
-                  isEditing={editing.rowId === row.id}
+                  isEditing={Number(editing.rowId) === row.original.id}
                   editingValue={editing.value}
                   onEditingValueChange={editing.updateValue}
                   onStartEdit={() => editing.start(row.id, row.original)}

@@ -1,5 +1,4 @@
 import { OpenApiTags } from "@api/constants";
-import { getCommonResponseType } from "@api/utils/common/get-common-response-type";
 import { createRouteWithDefaults } from "@api/utils/hono/openapi/createRoute";
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { prisma } from "@react-template/db";
@@ -28,7 +27,27 @@ const openAPIDefinition = createRouteWithDefaults({
       required: true,
     },
   },
-  responses: getCommonResponseType("add employee"),
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            data: z.object({
+              firstName: z.string(),
+              lastName: z.string(),
+              age: z.number(),
+              position: z.string(),
+              birthday: z.string(),
+              email: z.string(),
+              order: z.number().nullable(),
+              id: z.number(),
+            }),
+          }),
+        },
+      },
+      description: "Add Employee",
+    },
+  },
   tags: [OpenApiTags.EMPLOYEE],
 });
 
@@ -36,11 +55,10 @@ const route = new OpenAPIHono().openapi(openAPIDefinition, async (c) => {
   try {
     const body = c.req.valid("json");
 
-    await prisma.employee.create({ data: { ...body } });
+    const createdData = await prisma.employee.create({ data: { ...body } });
 
-    return c.json({ success: true, message: "successfully added" });
+    return c.json({ data: createdData }, 200);
   } catch (error) {
-    console.log(error);
     throw new Error((error as Error).message);
   }
 });
