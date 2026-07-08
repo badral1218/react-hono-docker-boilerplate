@@ -1,46 +1,49 @@
 import { OpenApiTags } from "@api/constants";
 import { getCommonResponseType } from "@api/utils/common/get-common-response-type";
 import { createRouteWithDefaults } from "@api/utils/hono/openapi/createRoute";
-import { OpenAPIHono, z } from "@hono/zod-openapi";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "@react-template/db";
-
-const bodySchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  age: z.number(),
-  position: z.string(),
-  email: z.string(),
-  order: z.number(),
-  department: z.string(),
-  phoneNumber: z.string(),
-});
+import { z } from "zod";
 
 const openAPIDefinition = createRouteWithDefaults({
-  path: "/add",
-  method: "post",
+  path: "/update",
+  method: "put",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: bodySchema,
+          schema: z.array(
+            z.object({
+              id: z.string(),
+              order: z.string(),
+            }),
+          ),
         },
       },
       required: true,
     },
   },
-  responses: getCommonResponseType("add employee"),
+  responses: getCommonResponseType("update orders"),
   tags: [OpenApiTags.EMPLOYEE],
 });
 
 const route = new OpenAPIHono().openapi(openAPIDefinition, async (c) => {
   try {
-    const body = c.req.valid("json");
+    const data = c.req.valid("json");
 
-    await prisma.employee.create({ data: { ...body } });
+    await prisma.$transaction(
+      data.map(({ id, order }) =>
+        prisma.employee.update({
+          where: { id: Number(id) },
+          data: {
+            order: Number(order) + 1,
+          },
+        }),
+      ),
+    );
 
-    return c.json({ success: true, message: "successfully added" });
+    return c.json({ success: true, message: "Successfully updated" });
   } catch (error) {
-    console.log(error);
     throw new Error((error as Error).message);
   }
 });

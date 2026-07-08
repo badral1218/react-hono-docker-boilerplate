@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Check, Edit2, Plus, X } from "lucide-react";
+import { Check, Edit2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import {
   useAddEmployeeMutation,
+  useDeleteEmployeeMutation,
   useUpdateEmployeeMutation,
 } from "@/modules/employee/mutations/useEmployeeMutation";
 import { useEmployeesQuery } from "@/modules/employee/queries/useEmployeesQuery";
@@ -33,8 +34,11 @@ function App() {
 
   const [editingValue, setEditingValue] = useState<Employee | null>(null);
 
-  const addEmployee = useAddEmployeeMutation();
+  const deleteEmployee = useDeleteEmployeeMutation();
+
   const updateEmployee = useUpdateEmployeeMutation();
+
+  const addEmployee = useAddEmployeeMutation();
 
   const table = useReactTable({
     columns: employeeColumns,
@@ -138,6 +142,12 @@ function App() {
     "phoneNumber",
   ];
 
+  const handleDelete = (employeeId: number) => {
+    if (confirm("Are u sure to delete it ?")) {
+      deleteEmployee.mutate(String(employeeId));
+    }
+  };
+
   return (
     <main className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-white">
       <div className="mx-auto max-w-7xl px-8 py-12">
@@ -174,6 +184,9 @@ function App() {
                   ))}
                   <TableHead className="h-14 border-zinc-800 text-zinc-300 font-semibold pr-4">
                     Edit
+                  </TableHead>
+                  <TableHead className="h-14 border-zinc-800 text-zinc-300 font-semibold pr-4">
+                    Delete
                   </TableHead>
                 </TableRow>
               ))}
@@ -242,6 +255,16 @@ function App() {
                         <Edit2 size={16} />
                       </Button>
                     )}
+                  </TableCell>
+
+                  <TableCell className="w-12 pr-4">
+                    <Button
+                      onClick={() => handleDelete(row.original.id)}
+                      className={"hover:cursor-pointer"}
+                      variant={"destructive"}
+                    >
+                      <Trash2 />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

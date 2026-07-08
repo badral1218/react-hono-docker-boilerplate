@@ -43,7 +43,7 @@ export const useUpdateEmployeeMutation = () => {
 
       await api.employee[":id"].$put({
         param: { id: String(id) },
-        json: rest,
+        json: { ...rest, order: rest.order ?? 1 },
       });
     },
 
@@ -57,6 +57,41 @@ export const useUpdateEmployeeMutation = () => {
 
     onError: (error) => {
       toast.error(error.message);
+    },
+  });
+};
+
+export const useDeleteEmployeeMutation = () => {
+  return useMutation({
+    mutationKey: ["deleteEmployee"],
+    mutationFn: async (employeeId: string) => {
+      await api.employee[":id"].$delete({ param: { id: employeeId } });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getEmployees"],
+      });
+      toast.success("Successfully deleted the employee.");
+    },
+
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+};
+
+export const useUpdateOrders = () => {
+  return useMutation({
+    mutationKey: ["updateEmployeesOrder"],
+    mutationFn: async (body: { id: string; order: string }[]) => {
+      await api.employee.order.update.$put({ json: body });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getEmployees"],
+      });
     },
   });
 };

@@ -15,8 +15,10 @@ const bodySchema = z.object({
   lastName: z.string(),
   age: z.number(),
   position: z.string(),
-  birthday: z.string(),
+  department: z.string(),
+  phoneNumber: z.string(),
   email: z.string(),
+  order: z.number(),
 });
 
 const openAPIDefinition = createRouteWithDefaults({
