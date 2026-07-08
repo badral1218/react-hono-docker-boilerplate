@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import {
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  type SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Plus, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EmployeeRow } from "@/components/employee/EmployeeRow";
@@ -27,10 +33,24 @@ function App() {
 
   const [tableData, setTableData] = useState<Employee[]>(data?.employees ?? []);
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   useEffect(() => {
-    if (data?.employees) {
-      setTableData(data.employees);
+    if (!data?.employees) {
+      return;
     }
+
+    setTableData((old) => {
+      const draft = old.find((row) => row.id === -1);
+      if (!draft) {
+        return data.employees;
+      }
+
+      const insertIndex = Math.max(0, (draft.order ?? 1) - 1);
+      const next = [...data.employees];
+      next.splice(insertIndex, 0, draft);
+      return next;
+    });
   }, [data]);
 
   const editing = useRowEditing<Employee>();
@@ -44,6 +64,11 @@ function App() {
     columns: employeeColumns,
     data: tableData,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
     meta: {
       updateData: (rowIndex, columnId, value) => {
         setTableData((old) =>
@@ -92,14 +117,7 @@ function App() {
   };
 
   const handleAddEmployee = () => {
-    if (editing.rowId) {
-      return;
-    }
-
-    const newEmployee = createNewEmployeeData((data?.employees.length ?? 0) + 1);
-
-    setTableData((old) => [newEmployee, ...old]);
-    editing.start("0", newEmployee);
+    void insertRowAt(1);
   };
 
   const handleDelete = (employeeId: number) => {
@@ -109,20 +127,35 @@ function App() {
   };
 
   const insertRowAt = async (fromOrder: number) => {
-    const shiftedRows = tableData.slice(fromOrder - 1);
+    if (editing.rowId) {
+      return;
+    }
+
+    const newEmployee = createNewEmployeeData(fromOrder);
+    const shiftedRows = tableData.filter((row) => row.id !== -1).slice(fromOrder - 1);
     const reorderPayload = shiftedRows.map(({ id, order }) => ({
       id: String(id),
       order: String(order),
     }));
 
-    updateEmployeesOrder.mutate(reorderPayload);
+    setTableData((old) => {
+      const withoutDraft = old.filter((row) => row.id !== -1);
+      const next = [...withoutDraft];
+      next.splice(fromOrder - 1, 0, newEmployee);
+      return next;
+    });
+    editing.start(String(fromOrder - 1), newEmployee);
 
-    const { id: _id, ...newEmployee } = createNewEmployeeData(fromOrder);
-    addEmployee.mutate(newEmployee);
+    if (reorderPayload.length === 0) {
+      return;
+    }
+
+    try {
+      await updateEmployeesOrder.mutateAsync(reorderPayload);
+    } catch {
+      handleCancelEditing();
+    }
   };
-
-  const addRowAbove = (currentOrder: number | null) => insertRowAt(currentOrder ?? 1);
-  const addRowBelow = (currentOrder: number | null) => insertRowAt((currentOrder ?? 1) + 1);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState message={error.message} />;
@@ -130,7 +163,7 @@ function App() {
   const total = data?.employees.length ?? 0;
 
   return (
-    <main className="min-h-screen bg-[#0A0D12] text-[#E7EAF0] font-['Inter',ui-sans-serif,sans-serif]">
+    <main className="min-h-screen bg-[#111827] text-[#E7EAF0] font-['Inter',ui-sans-serif,sans-serif]">
       <style>{`
         @keyframes row-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
         .row-anim { animation: row-in .35s ease-out both; animation-delay: var(--delay, 0ms); }
@@ -190,15 +223,23 @@ function App() {
                   </TableHead>
                   {headerGroup.headers.map((header) => (
                     <TableHead
+                      onClick={header.column.getToggleSortingHandler()}
+                      data-sort={header.column.getCanSort()}
                       key={header.id}
-                      className="h-12 border-[#232A36] text-[11px] font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace]"
+                      className="h-12 border-[#232A36] text-[11px] data-[sort=true]:cursor-pointer data-[sort=true]:hover:bg-[#4FD8C4]/10 font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace]"
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanSort() && (
+                        <span className="ml-2 text-xs">
+                          {header.column.getIsSorted() === "asc"
+                            ? "↑"
+                            : header.column.getIsSorted() === "desc"
+                              ? "↓"
+                              : ""}
+                        </span>
+                      )}
                     </TableHead>
                   ))}
-                  <TableHead className="h-12 border-[#232A36] text-[11px] font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace]">
-                    Reorder
-                  </TableHead>
                   <TableHead className="h-12 border-[#232A36] text-[11px] font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace] pr-4">
                     Actions
                   </TableHead>
@@ -212,15 +253,13 @@ function App() {
                   key={row.id}
                   row={row}
                   index={index}
-                  isEditing={Number(editing.rowId) === row.original.id}
+                  isEditing={editing.rowId === row.id}
                   editingValue={editing.value}
                   onEditingValueChange={editing.updateValue}
                   onStartEdit={() => editing.start(row.id, row.original)}
                   onCancelEdit={handleCancelEditing}
                   onSaveEdit={handleSaveEditing}
                   isSaving={addEmployee.isPending || updateEmployee.isPending}
-                  onAddAbove={() => addRowAbove(row.original.order)}
-                  onAddBelow={() => addRowBelow(row.original.order)}
                   onDelete={() => handleDelete(row.original.id)}
                 />
               ))}

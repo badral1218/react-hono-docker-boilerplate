@@ -1,5 +1,5 @@
 import { flexRender, type Row } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, Check, Edit2, Trash2, X } from "lucide-react";
+import { Check, Edit2, Trash2, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,6 @@ type EmployeeRowProps = {
   onCancelEdit: () => void;
   onSaveEdit: () => void;
   isSaving: boolean;
-  onAddAbove: () => void;
-  onAddBelow: () => void;
   onDelete: () => void;
 };
 
@@ -42,8 +40,6 @@ export const EmployeeRow = ({
   onCancelEdit,
   onSaveEdit,
   isSaving,
-  onAddAbove,
-  onAddBelow,
   onDelete,
 }: EmployeeRowProps) => {
   const employee = row.original;
@@ -94,27 +90,6 @@ export const EmployeeRow = ({
           )}
         </TableCell>
       ))}
-
-      <TableCell className="w-16">
-        <div className="flex gap-3 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-          <button
-            type="button"
-            onClick={onAddAbove}
-            aria-label="Insert row above"
-            className="rounded p-1 text-[#8891A4] transition-colors hover:bg-[#4FD8C4]/10 hover:text-[#4FD8C4] cursor-pointer"
-          >
-            <ArrowUp size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={onAddBelow}
-            aria-label="Insert row below"
-            className="rounded p-1 text-[#8891A4] transition-colors hover:bg-[#4FD8C4]/10 hover:text-[#4FD8C4] cursor-pointer"
-          >
-            <ArrowDown size={16} />
-          </button>
-        </div>
-      </TableCell>
 
       <TableCell className="w-28 pr-4">
         {isEditing ? (
