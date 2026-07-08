@@ -9,8 +9,10 @@ const bodySchema = z.object({
   lastName: z.string(),
   age: z.number(),
   position: z.string(),
-  birthday: z.string(),
   email: z.string(),
+  order: z.number(),
+  department: z.string(),
+  phoneNumber: z.string(),
 });
 
 const openAPIDefinition = createRouteWithDefaults({

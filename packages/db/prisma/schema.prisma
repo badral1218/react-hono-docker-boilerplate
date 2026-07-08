@@ -43,11 +43,13 @@ enum Role {
 }
 
 model Employee {
-  id Int @id @default(autoincrement())
-  email String @unique
+  id        Int    @id @default(autoincrement())
+  email     String @unique
   firstName String
-  lastName String
-  age Int
-  birthday String
-  position String
+  lastName  String
+  age       Int
+  department String
+  phoneNumber String
+  position  String
+  order     Int?
 }
