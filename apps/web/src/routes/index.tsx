@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -12,6 +14,7 @@ import { EmployeeRow } from "@/components/employee/EmployeeRow";
 import { ErrorState } from "@/components/employee/ErrorState";
 import { LoadingState } from "@/components/employee/LoadingState";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useRowEditing } from "@/hooks/use-row-editing";
 import {
@@ -34,6 +37,8 @@ function App() {
   const [tableData, setTableData] = useState<Employee[]>(data?.employees ?? []);
 
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const [globalFilter, setGlobalFilter] = useState("");
 
   useEffect(() => {
     if (!data?.employees) {
@@ -66,8 +71,11 @@ function App() {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
+    getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
+      globalFilter,
     },
     meta: {
       updateData: (rowIndex, columnId, value) => {
@@ -163,7 +171,7 @@ function App() {
   const total = data?.employees.length ?? 0;
 
   return (
-    <main className="min-h-screen bg-[#111827] text-[#E7EAF0] font-['Inter',ui-sans-serif,sans-serif]">
+    <main className="min-h-screen bg-[#F6F7F9] text-[#1A1D23] font-['Inter',ui-sans-serif,sans-serif]">
       <style>{`
         @keyframes row-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
         .row-anim { animation: row-in .35s ease-out both; animation-delay: var(--delay, 0ms); }
@@ -175,37 +183,46 @@ function App() {
       <div className="mx-auto max-w-7xl px-8 py-12">
         <header className="mb-8 flex items-end justify-between">
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-[#4FD8C4] font-['JetBrains_Mono',ui-monospace,monospace]">
+            <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-[#0F8C7C] font-['JetBrains_Mono',ui-monospace,monospace]">
               Team directory
             </p>
-            <h1 className="text-4xl font-semibold tracking-tight font-['Space_Grotesk',ui-sans-serif,sans-serif]">
+            <h1 className="text-4xl font-semibold tracking-tight text-[#111318] font-['Space_Grotesk',ui-sans-serif,sans-serif]">
               Employee management
             </h1>
-            <p className="mt-2 text-[#8891A4]">
+            <p className="mt-2 text-[#6B7280]">
               Manage your organization's employees from one place.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-[#232A36] bg-[#10141B] px-4 py-2">
+          <div className="flex items-center gap-2 rounded-full border border-[#E2E5EA] bg-white px-4 py-2 shadow-sm">
             <span className="relative flex h-2 w-2">
-              <span className="pulse-dot absolute inline-flex h-full w-full rounded-full bg-[#4FD8C4]" />
+              <span className="pulse-dot absolute inline-flex h-full w-full rounded-full bg-[#0F8C7C]" />
             </span>
-            <Users size={14} className="text-[#8891A4]" />
-            <span className="text-sm font-['JetBrains_Mono',ui-monospace,monospace] text-[#E7EAF0]">
+            <Users size={14} className="text-[#6B7280]" />
+            <span className="text-sm font-['JetBrains_Mono',ui-monospace,monospace] text-[#1A1D23]">
               {total} {total === 1 ? "employee" : "employees"}
             </span>
           </div>
         </header>
 
-        <div className="relative rounded-2xl border border-[#232A36] bg-[#10141B] shadow-2xl overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#4FD8C4]/40 to-transparent" />
+        <div className="relative rounded-2xl border border-[#E2E5EA] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_4px_16px_rgba(16,24,40,0.06)] overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#0F8C7C]/40 to-transparent" />
 
-          <div className="flex items-center justify-between border-b border-[#232A36] px-4 py-3">
-            <h2 className="text-sm font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace]">
-              Employees
-            </h2>
+          <div className="flex items-center justify-between border-b border-[#E2E5EA] bg-[#FAFBFC] px-4 py-3">
+            <div className="flex gap-3 items-center">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace]">
+                Employees
+              </h2>
+              <Input
+                type="text"
+                value={globalFilter ?? ""}
+                onChange={(e) => table.setGlobalFilter(e.target.value)}
+                placeholder="Search all columns..."
+                className="border-[#E2E5EA] bg-white text-[#1A1D23] placeholder:text-[#9AA2B1] focus-visible:ring-[#0F8C7C]/40"
+              />
+            </div>
             <Button
-              className="cursor-pointer bg-[#4FD8C4] text-[#04342C] hover:bg-[#3fc4b1]"
+              className="cursor-pointer bg-[#0F8C7C] text-white hover:bg-[#0C7365]"
               onClick={handleAddEmployee}
               disabled={!!editing.rowId}
             >
@@ -215,10 +232,10 @@ function App() {
           </div>
 
           <Table>
-            <TableHeader className="sticky top-0 z-10 bg-[#10141B]/90 backdrop-blur">
+            <TableHeader className="sticky top-0 z-10 bg-[#FAFBFC]/95 backdrop-blur">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-[#232A36] hover:bg-transparent">
-                  <TableHead className="h-12 w-14 border-[#232A36] pl-4 text-[11px] font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace]">
+                <TableRow key={headerGroup.id} className="border-[#E2E5EA] hover:bg-transparent">
+                  <TableHead className="h-12 w-14 border-[#E2E5EA] pl-4 text-[11px] font-medium uppercase tracking-wider text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace]">
                     #
                   </TableHead>
                   {headerGroup.headers.map((header) => (
@@ -226,7 +243,7 @@ function App() {
                       onClick={header.column.getToggleSortingHandler()}
                       data-sort={header.column.getCanSort()}
                       key={header.id}
-                      className="h-12 border-[#232A36] text-[11px] data-[sort=true]:cursor-pointer data-[sort=true]:hover:bg-[#4FD8C4]/10 font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace]"
+                      className="h-12 border-[#E2E5EA] text-[11px] data-[sort=true]:cursor-pointer data-[sort=true]:hover:bg-[#0F8C7C]/8 font-medium uppercase tracking-wider text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace]"
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getCanSort() && (
@@ -240,7 +257,7 @@ function App() {
                       )}
                     </TableHead>
                   ))}
-                  <TableHead className="h-12 border-[#232A36] text-[11px] font-medium uppercase tracking-wider text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace] pr-4">
+                  <TableHead className="h-12 border-[#E2E5EA] text-[11px] font-medium uppercase tracking-wider text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace] pr-4">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -267,10 +284,10 @@ function App() {
           </Table>
         </div>
 
-        <div className="mt-5 flex items-center justify-between text-sm text-[#8891A4]">
+        <div className="mt-5 flex items-center justify-between text-sm text-[#6B7280]">
           <span>
             Total employees:{" "}
-            <span className="font-medium text-[#E7EAF0] font-['JetBrains_Mono',ui-monospace,monospace]">
+            <span className="font-medium text-[#1A1D23] font-['JetBrains_Mono',ui-monospace,monospace]">
               {total}
             </span>
           </span>

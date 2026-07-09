@@ -48,7 +48,7 @@ export const EmployeeRow = ({
 
   return (
     <TableRow
-      className="row-anim border-[#232A36] group transition-colors hover:bg-[#141922]"
+      className="row-anim border-[#E2E5EA] group transition-colors hover:bg-[#F6F7F9]"
       style={{ "--delay": `${Math.min(index, 12) * 30}ms` } as CSSProperties}
     >
       <TableCell className="w-14 pl-4">
@@ -68,20 +68,20 @@ export const EmployeeRow = ({
       </TableCell>
 
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id} className="py-4 text-[#E7EAF0]">
+        <TableCell key={cell.id} className="py-4 text-[#1A1D23]">
           {isEditing && EDITABLE_COLUMNS.includes(cell.column.id as keyof Employee) ? (
             <Input
               value={String(editingValue?.[cell.column.id as keyof Employee] ?? "")}
               onChange={(e) => onEditingValueChange(cell.column.id, e.target.value)}
-              className="h-9 border-[#232A36] bg-[#0A0D12] text-[#E7EAF0] focus-visible:ring-2 focus-visible:ring-[#4FD8C4]/40 focus-visible:border-[#4FD8C4]/60"
+              className="h-9 border-[#E2E5EA] bg-white text-[#1A1D23] focus-visible:ring-2 focus-visible:ring-[#0F8C7C]/30 focus-visible:border-[#0F8C7C]/60"
             />
           ) : (
             <span
               className={
                 cell.column.id === "email"
-                  ? "text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace] text-[13px]"
+                  ? "text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace] text-[13px]"
                   : cell.column.id === "age"
-                    ? "text-[#8891A4] font-['JetBrains_Mono',ui-monospace,monospace] text-[13px]"
+                    ? "text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace] text-[13px]"
                     : ""
               }
             >
@@ -97,15 +97,15 @@ export const EmployeeRow = ({
             <Button
               variant="secondary"
               size="icon"
-              className="h-8 w-8 cursor-pointer border border-[#232A36] bg-transparent hover:bg-[#141922]"
+              className="h-8 w-8 cursor-pointer border border-[#E2E5EA] bg-white hover:bg-[#F6F7F9]"
               onClick={onCancelEdit}
               aria-label="Cancel edit"
             >
-              <X className="text-white" size={16} />
+              <X className="text-[#1A1D23]" size={16} />
             </Button>
             <Button
               size="icon"
-              className="h-8 w-8 cursor-pointer bg-[#4FD8C4] text-[#04342C] hover:bg-[#3fc4b1]"
+              className="h-8 w-8 cursor-pointer bg-[#0F8C7C] text-white hover:bg-[#0C7365]"
               onClick={onSaveEdit}
               disabled={isSaving}
               aria-label="Save changes"
@@ -119,7 +119,7 @@ export const EmployeeRow = ({
               type="button"
               onClick={onStartEdit}
               aria-label="Edit employee"
-              className="rounded p-1.5 text-[#8891A4] transition-colors hover:bg-[#4FD8C4]/10 hover:text-[#4FD8C4] cursor-pointer"
+              className="rounded p-1.5 text-[#6B7280] transition-colors hover:bg-[#0F8C7C]/10 hover:text-[#0F8C7C] cursor-pointer"
             >
               <Edit2 size={16} />
             </button>
@@ -127,7 +127,7 @@ export const EmployeeRow = ({
               type="button"
               onClick={onDelete}
               aria-label="Delete employee"
-              className="rounded p-1.5 text-[#8891A4] transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+              className="rounded p-1.5 text-[#6B7280] transition-colors hover:bg-red-500/10 hover:text-red-500 cursor-pointer"
             >
               <Trash2 size={16} />
             </button>
