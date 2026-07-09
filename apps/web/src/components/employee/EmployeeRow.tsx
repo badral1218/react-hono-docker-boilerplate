@@ -1,11 +1,14 @@
 import { flexRender, type Row } from "@tanstack/react-table";
-import { Check, Edit2, Trash2, X } from "lucide-react";
+import { format, isValid, parseISO } from "date-fns";
+import { Calendar as CalendarIcon, Check, Edit2, Trash2, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { Employee } from "@/types";
 import { initialsFor, tagFor } from "@/utils/employee-table-utils";
+import { Calendar } from "../ui/calendar";
 
 type EmployeeRowProps = {
   row: Row<Employee>;
@@ -24,11 +27,17 @@ const EDITABLE_COLUMNS: Array<keyof Employee> = [
   "email",
   "firstName",
   "lastName",
-  "age",
+  "birthdate",
   "position",
   "department",
   "phoneNumber",
 ];
+
+const parseBirthdate = (value: unknown): Date | undefined => {
+  if (!value || typeof value !== "string") return undefined;
+  const parsed = parseISO(value);
+  return isValid(parsed) ? parsed : undefined;
+};
 
 export const EmployeeRow = ({
   row,
@@ -44,7 +53,6 @@ export const EmployeeRow = ({
 }: EmployeeRowProps) => {
   const employee = row.original;
   const tag = tagFor(`${employee.firstName ?? ""}${employee.lastName ?? ""}`);
-  const orderLabel = String(employee.order ?? index + 1).padStart(2, "0");
 
   return (
     <TableRow
@@ -53,11 +61,7 @@ export const EmployeeRow = ({
     >
       <TableCell className="w-14 pl-4">
         <div className="flex items-center gap-3">
-          <span
-            className={`inline-flex h-6 min-w-6 items-center justify-center rounded px-1 text-[11px] font-medium ring-1 ${tag?.bg} ${tag?.text} ${tag?.ring} font-['JetBrains_Mono',ui-monospace,monospace]`}
-          >
-            {orderLabel}
-          </span>
+          <span className={``}>{index + 1}</span>
           <span
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${tag?.solid} ${tag?.text}`}
             aria-hidden="true"
@@ -67,29 +71,76 @@ export const EmployeeRow = ({
         </div>
       </TableCell>
 
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id} className="py-4 text-[#1A1D23]">
-          {isEditing && EDITABLE_COLUMNS.includes(cell.column.id as keyof Employee) ? (
-            <Input
-              value={String(editingValue?.[cell.column.id as keyof Employee] ?? "")}
-              onChange={(e) => onEditingValueChange(cell.column.id, e.target.value)}
-              className="h-9 border-[#E2E5EA] bg-white text-[#1A1D23] focus-visible:ring-2 focus-visible:ring-[#0F8C7C]/30 focus-visible:border-[#0F8C7C]/60"
-            />
-          ) : (
+      {row.getVisibleCells().map((cell) => {
+        const columnId = cell.column.id as keyof Employee;
+        const isBirthdateColumn = columnId === "birthdate";
+
+        if (isEditing && EDITABLE_COLUMNS.includes(columnId)) {
+          if (isBirthdateColumn) {
+            const rawValue = editingValue?.birthdate;
+            const selectedDate = parseBirthdate(rawValue);
+
+            return (
+              <TableCell key={cell.id} className="py-4 text-[#1A1D23]">
+                <Popover>
+                  <PopoverTrigger>
+                    <Button
+                      variant="outline"
+                      className="h-9 w-full justify-start border-[#E2E5EA] bg-white text-left font-normal text-[#1A1D23] hover:bg-white hover:text-[#1A1D23]"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-[#6B7280]" />
+                      {selectedDate ? (
+                        format(selectedDate, "MMM d, yyyy")
+                      ) : (
+                        <span className="text-[#9AA2B1]">Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) =>
+                        onEditingValueChange("birthdate", date ? format(date, "yyyy-MM-dd") : "")
+                      }
+                      captionLayout="dropdown"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </TableCell>
+            );
+          }
+
+          return (
+            <TableCell key={cell.id} className="py-4 text-[#1A1D23]">
+              <Input
+                value={String(editingValue?.[columnId] ?? "")}
+                onChange={(e) => onEditingValueChange(cell.column.id, e.target.value)}
+                className="h-9 border-[#E2E5EA] bg-white text-[#1A1D23] focus-visible:ring-2 focus-visible:ring-[#0F8C7C]/30 focus-visible:border-[#0F8C7C]/60"
+              />
+            </TableCell>
+          );
+        }
+
+        return (
+          <TableCell key={cell.id} className="py-4 text-[#1A1D23]">
             <span
               className={
-                cell.column.id === "email"
+                cell.column.id === "email" || cell.column.id === "age" || isBirthdateColumn
                   ? "text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace] text-[13px]"
-                  : cell.column.id === "age"
-                    ? "text-[#6B7280] font-['JetBrains_Mono',ui-monospace,monospace] text-[13px]"
-                    : ""
+                  : ""
               }
             >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              {isBirthdateColumn
+                ? (() => {
+                    const date = parseBirthdate(employee.birthdate);
+                    return date ? format(date, "MMM d, yyyy") : "—";
+                  })()
+                : flexRender(cell.column.columnDef.cell, cell.getContext())}
             </span>
-          )}
-        </TableCell>
-      ))}
+          </TableCell>
+        );
+      })}
 
       <TableCell className="w-28 pr-4">
         {isEditing ? (
@@ -114,7 +165,7 @@ export const EmployeeRow = ({
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onStartEdit}

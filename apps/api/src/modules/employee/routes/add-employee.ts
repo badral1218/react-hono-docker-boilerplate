@@ -6,7 +6,7 @@ import { prisma } from "@react-template/db";
 const bodySchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  age: z.number(),
+  birthdate: z.string(),
   position: z.string(),
   email: z.string(),
   order: z.number(),
@@ -35,9 +35,8 @@ const openAPIDefinition = createRouteWithDefaults({
             data: z.object({
               firstName: z.string(),
               lastName: z.string(),
-              age: z.number(),
+              birthdate: z.string(),
               position: z.string(),
-              birthday: z.string(),
               email: z.string(),
               order: z.number().nullable(),
               id: z.number(),

@@ -5,10 +5,6 @@ import type { Employee } from "@/types";
 export const columnHelper = createColumnHelper<Employee>();
 
 export const employeeColumns = [
-  columnHelper.accessor("order", {
-    header: "No",
-    cell: (info) => info.getValue(),
-  }),
   columnHelper.accessor("email", {
     header: "Email",
     cell: (info) => info.getValue(),
@@ -21,8 +17,8 @@ export const employeeColumns = [
     header: "Last name",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("age", {
-    header: "Age",
+  columnHelper.accessor("birthdate", {
+    header: "Birthdate",
     cell: (info) => info.getValue(),
   }),
   columnHelper.accessor("position", {
@@ -44,7 +40,7 @@ export const createNewEmployeeData = (order: number) => {
     id: -1,
     firstName: "",
     lastName: "",
-    age: 0,
+    birthdate: "",
     email: "",
     order,
     position: "",

@@ -13,7 +13,7 @@ const updateParamsSchema = z.object({
 const bodySchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  age: z.number(),
+  birthdate: z.string(),
   position: z.string(),
   department: z.string(),
   phoneNumber: z.string(),

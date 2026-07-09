@@ -1,9 +1,9 @@
 export const LoadingState = () => {
   return (
-    <div className="min-h-screen bg-[#0A0D12] flex items-center justify-center">
-      <div className="flex items-center gap-3 text-[#8891A4]">
+    <div className="min-h-screen bg-[#F6F7F9] flex items-center justify-center">
+      <div className="flex items-center gap-3 text-[#6B7280]">
         <span className="relative flex h-2 w-2">
-          <span className="pulse-dot absolute inline-flex h-full w-full rounded-full bg-[#4FD8C4]" />
+          <span className="pulse-dot absolute inline-flex h-full w-full rounded-full bg-[#0F8C7C]" />
         </span>
         <p className="text-lg font-['Space_Grotesk',ui-sans-serif,sans-serif]">
           Loading employees…

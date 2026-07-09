@@ -106,7 +106,6 @@ function App() {
         {
           ...rest,
           order: rest.order ?? tableData.length,
-          age: Number(rest.age),
         },
         {
           onSuccess: () => {
@@ -285,12 +284,6 @@ function App() {
         </div>
 
         <div className="mt-5 flex items-center justify-between text-sm text-[#6B7280]">
-          <span>
-            Total employees:{" "}
-            <span className="font-medium text-[#1A1D23] font-['JetBrains_Mono',ui-monospace,monospace]">
-              {total}
-            </span>
-          </span>
           <span className="font-['JetBrains_Mono',ui-monospace,monospace] text-xs uppercase tracking-wider">
             Internal dashboard
           </span>
