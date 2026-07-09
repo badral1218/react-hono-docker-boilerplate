@@ -17,7 +17,7 @@ const openAPIDefinition = createRouteWithDefaults({
                 email: z.string(),
                 firstName: z.string(),
                 lastName: z.string(),
-                age: z.number(),
+                birthdate: z.string(),
                 order: z.number().nullable(),
                 position: z.string(),
                 department: z.string(),
